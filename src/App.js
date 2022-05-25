@@ -1,6 +1,7 @@
 import "./styling/App.css";
 import { useState, useEffect } from "react";
-import {postNote} from './utils/postNote'
+import "./firebase";
+import { getDatabase, ref, update, onValue } from "firebase/database";
 
 function App() {
   const [title, setTitle] = useState("");
@@ -8,17 +9,25 @@ function App() {
   const [takingNote, setTakingNote] = useState(true);
   const [nav, setNav] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const testObject = {
-    ctest1: "testBody1",
-    btest2: "testBody2",
-    atest3: "testBody3",
-  };
+  const [notesObject, setNotesObject] = useState({"placeholder": "object"});
+  const notesRef = ref(getDatabase(), "notes");
 
   function getNotes() {
-    //fetch list of notes from backend
-    //will be called on start up and when new notes are submitted
+    return onValue(notesRef, (snapshot) => {
+      const notes = Object(snapshot.val());
+      handleNav(Object.keys(notes).sort());
+      setNotesObject(notes);
+    });
   }
 
+  function sendNote() {
+    update(notesRef, {
+      [title]: body,
+    });
+    setTitle("");
+    setBody("");
+  }
+  
   const handleClick = (e) => {
     setSelectedNote(e.target.value);
     setTakingNote(false);
@@ -38,27 +47,18 @@ function App() {
     );
 
     return handleNav(navArray, [...navButtons, newNavButton]);
-    //would this be better as a component?
-  }
-
-  function sendNote() {
-    return postNote(title, body)
   }
 
   function handleSwitch() {
-    setTakingNote(true)
+    setTakingNote(true);
     setSelectedNote(null);
   }
 
   useEffect(() => {
-    handleNav(Object.keys(testObject).sort());
+    getNotes();
     console.log("useEffect");
   }, []);
 
-
-
-  console.log(Object.keys(testObject).sort());
-  console.log(selectedNote);
   return (
     <div className="App">
       <div className="NavContainer">
@@ -79,13 +79,22 @@ function App() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
-          <button style={{ width: "fit-content", fontSize: 30}}className="Add" onClick={sendNote}>Post</button>
+          <button
+            style={{ width: "fit-content", fontSize: 30 }}
+            className="Add"
+            onClick={sendNote}
+          >
+            Post
+          </button>
         </div>
       ) : (
         <div className="NoteContainer">
           <header className="Header">{selectedNote}</header>
-          <body className="Header">{testObject[selectedNote]}</body>
-          <button className="Add" onClick={handleSwitch}> + </button>
+          <body className="Header">{notesObject[selectedNote]}</body>
+          <button className="Add" onClick={handleSwitch}>
+            {" "}
+            +{" "}
+          </button>
         </div>
       )}
     </div>
