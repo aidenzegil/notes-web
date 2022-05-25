@@ -1,0 +1,22 @@
+.App {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.NavContainer {
+  width: 20%;
+  height: 100vh;
+  background: burlywood;
+}
+
+.NoteContainer {
+  width: 80%;
+  height: 100vh;
+  background: darkgrey;
+}
+
+.Header {
+  font-size: 30px;
+}
+/*# sourceMappingURL=App.css.map */
